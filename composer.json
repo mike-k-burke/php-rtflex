@@ -2,5 +2,8 @@
     "name": "silvermine/php-rtflex",
     "autoload": {
         "classmap": ["rtflex"]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.8.*"
     }
 }
