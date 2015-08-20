@@ -10,7 +10,7 @@ class StringReader implements IByteReader {
 
     public function __construct($string) {
         $this->string = $string;
-        $this->size = strlen($string);
+        $this->size = mb_strlen($string);
     }
 
     public function close() {
@@ -21,8 +21,8 @@ class StringReader implements IByteReader {
 
     public function lookAhead($offset = 0) {
         $pos = $this->index + $offset;
-        $byte = substr($this->string, $pos, 1);
-        return strlen($byte) == 0 ? false : $byte;
+        $byte = mb_substr($this->string, $pos, 1);
+        return mb_strlen($byte) == 0 ? false : $byte;
     }
 
     public function readByte() {
