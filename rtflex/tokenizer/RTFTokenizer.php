@@ -12,13 +12,21 @@ class RTFTokenizer implements ITokenGenerator {
     const HEX = "/[\-0-9A-F]/i";
     const HEX_BYTE = "'";
 
+    /**
+     * @var IByteReader
+     */
     private $reader;
 
+    /**
+     * @param IByteReader $reader
+     */
     public function __construct(IByteReader $reader) {
         $this->reader = $reader;
     }
 
-
+    /**
+     * @return array
+     */
     private function readControlWord() {
         if ($this->reader->lookAhead() == "\n") {
             return array(RTFToken::T_TEXT, null, $this->reader->readByte());
@@ -55,10 +63,59 @@ class RTFTokenizer implements ITokenGenerator {
         $param = strlen($param) == 0 ? null : $param;
         $param = is_numeric($param) ? (int)$param : null;
         $type = strlen($word) > 1 ? RTFToken::T_CONTROL_WORD : RTFToken::T_CONTROL_SYMBOL;
+
+        // These are special cases to catch multi-character control symbols
+        switch($word) {
+            case 'bullet':
+            case 'cell':
+            case 'chatn':
+            case 'chdate':
+            case 'chdpa':
+            case 'chdpl':
+            case 'chftn':
+            case 'chftnsep':
+            case 'chftnsepc':
+            case 'chpgn':
+            case 'chtime':
+            case 'column':
+            case 'emdash':
+            case 'emspace':
+            case 'endash':
+            case 'enspace':
+            case 'lbrN ***':
+            case 'ldblquote':
+            case 'line':
+            case 'lquote':
+            case 'ltrmark':
+            case 'nestcell ***':
+            case 'nestrow ***':
+            case 'page':
+            case 'par':
+            case 'qmspace *':
+            case 'rdblquote':
+            case 'row':
+            case 'rquote':
+            case 'rtlmark':
+            case 'sect':
+            case 'sectnum':
+            case 'tab':
+            case 'zwbo *':
+            case 'zwj':
+            case 'zwnbo *':
+            case 'zwnj':
+                $type = RTFToken::T_CONTROL_SYMBOL;
+                break;
+            default:
+                break;
+        }
+
         return array($type, $word, $param);
     }
 
-
+    /**
+     * @param $start
+     * @return string
+     */
     private function readText($start) {
         $buffer = $start;
         $last = $start;
@@ -79,7 +136,9 @@ class RTFTokenizer implements ITokenGenerator {
         return $buffer;
     }
 
-
+    /**
+     * @return bool|RTFToken
+     */
     public function readToken() {
         $byte = $this->reader->readByte();
         if ($byte === false) {

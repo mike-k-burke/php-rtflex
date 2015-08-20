@@ -5,19 +5,35 @@ use RTFLex\tokenizer\RTFToken;
 
 
 class RTFGroup {
+
+    /**
+     * @var array
+     */
     private $controls = array();
+
+    /**
+     * @var array
+     */
     private $content = array();
+
+    /**
+     * @var
+     */
     private $parent;
 
-
-    public function extractText($allowInvisible = false) {
+    /**
+     * @param bool|false $allowInvisible
+     * @param bool|true $newlinesAsSpaces
+     * @return string
+     */
+    public function extractText($allowInvisible = false, $newlinesAsSpaces = true) {
         if (!$this->isPrintableText() && !$allowInvisible) {
             return "";
         }
 
         $text = "";
         foreach ($this->content as $piece) {
-            $t = $piece->extractText();
+            $t = $piece->extractText($allowInvisible, $newlinesAsSpaces);
             if ($t == ';') {
                 var_dump($piece);
             }
@@ -27,7 +43,10 @@ class RTFGroup {
         return $text;
     }
 
-
+    /**
+     * @param $name
+     * @return bool
+     */
     public function hasControlWord($name) {
         foreach ($this->controls as $control) {
             if ($control->getName() == $name) {
@@ -37,7 +56,9 @@ class RTFGroup {
         return false;
     }
 
-
+    /**
+     * @return bool
+     */
     public function isPrintableText() {
         // These control words define a text group that has a non-printable destination
         $nonPrintableWords = array(
@@ -90,7 +111,9 @@ class RTFGroup {
         return count($dest) == 0;
     }
 
-
+    /**
+     * @return array
+     */
     public function listChildren() {
         $children = array();
 
@@ -103,7 +126,10 @@ class RTFGroup {
         return $children;
     }
 
-
+    /**
+     * @param RTFToken $token
+     * @throws Exception
+     */
     public function pushContent(RTFToken $token) {
         $type = $token->getType();
         if ($type != RTFToken::T_CONTROL_SYMBOL && $type != RTFToken::T_TEXT) {
@@ -113,7 +139,10 @@ class RTFGroup {
         array_push($this->content, $token);
     }
 
-
+    /**
+     * @param RTFToken $token
+     * @throws Exception
+     */
     public function pushControlWord(RTFToken $token) {
         if ($token->getType() != RTFToken::T_CONTROL_WORD) {
             throw new Exception("Incorrect token type");
@@ -122,13 +151,17 @@ class RTFGroup {
         array_push($this->controls, $token);
     }
 
-
+    /**
+     * @param RTFGroup $group
+     */
     public function pushGroup(RTFGroup $group) {
         $group->setParent($this);
         array_push($this->content, $group);
     }
 
-
+    /**
+     * @param RTFGroup $parent
+     */
     protected function setParent(RTFGroup $parent) {
         $this->parent = $parent;
     }

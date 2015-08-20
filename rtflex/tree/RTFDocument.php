@@ -1,23 +1,39 @@
 <?php
 
 namespace RTFLex\tree;
+
 use RTFLex\tokenizer\ITokenGenerator;
 use RTFLex\tokenizer\RTFToken;
 
-
 class RTFDocument {
+    /**
+     * @var array
+     */
     private $groupStack = array();
-    private $tokenizer;
+
+    /**
+     * @var RTFGroup
+     */
     private $rootGroup;
+
+    /**
+     * @var RTFGroup
+     */
     private $metadataGroup;
 
 
+    /**
+     * @param ITokenGenerator $tokenizer
+     */
     public function __construct(ITokenGenerator $tokenizer) {
         $this->buildTree($tokenizer);
     }
 
-
-    protected function buildTree($tokenizer) {
+    /**
+     * @param ITokenGenerator $tokenizer
+     * @throws Exception
+     */
+    protected function buildTree(ITokenGenerator $tokenizer) {
         // Wipe the stack
         $this->groupStack = array();
         $this->rootGroup = null;
@@ -27,12 +43,20 @@ class RTFDocument {
         }
     }
 
-
-    public function extractText() {
-        return $this->rootGroup->extractText();
+    /**
+     * @param bool|false $allowInvisible
+     * @param bool|true $newlinesAsSpaces
+     * @return string
+     */
+    public function extractText($allowInvisible = false, $newlinesAsSpaces = true) {
+        return $this->rootGroup->extractText($allowInvisible, $newlinesAsSpaces);
     }
 
-
+    /**
+     * @param $root
+     * @param $control
+     * @return null
+     */
     private function findGroup($root, $control) {
         if (!$root) {
             return null;
@@ -51,7 +75,9 @@ class RTFDocument {
         return null;
     }
 
-
+    /**
+     * @return null|RTFGroup
+     */
     private function getInfoGroup() {
         if (is_null($this->metadataGroup)) {
             $this->metadataGroup = $this->findGroup($this->rootGroup, 'info');
@@ -59,7 +85,10 @@ class RTFDocument {
         return $this->metadataGroup;
     }
 
-
+    /**
+     * @param $name
+     * @return null|string
+     */
     public function getMetadata($name) {
         $info = $this->getInfoGroup();
         $block = $this->findGroup($info, $name);
@@ -68,7 +97,10 @@ class RTFDocument {
            : null;
     }
 
-
+    /**
+     * @param $token
+     * @throws Exception
+     */
     protected function parseToken($token) {
         switch ($token->getType()) {
             // Start a new Group
