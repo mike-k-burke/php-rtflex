@@ -1,7 +1,5 @@
 <?php
 
-include "../rtflex/RTFLexer.php";
-
 use RTFLex\io\StreamReader;
 use RTFLex\tokenizer\RTFTokenizer;
 use RTFLex\tokenizer\RTFToken;

@@ -1,7 +1,5 @@
 <?php
 
-include "../rtflex/RTFLexer.php";
-
 class RTFLexerTest extends PHPUnit_Framework_TestCase {
 
     public function testDocumentFromFile() {
