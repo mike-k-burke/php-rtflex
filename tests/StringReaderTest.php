@@ -1,5 +1,7 @@
 <?php
 
+include "../rtflex/RTFLexer.php";
+
 use RTFLex\io\StringReader;
 
 
