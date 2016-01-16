@@ -1,13 +1,14 @@
 # RTFLex
 
-[![Build Status](https://travis-ci.org/silvermine/php-rtflex.png?branch=master)](https://travis-ci.org/silvermine/php-rtflex)
+[![Build Status](https://travis-ci.org/Skyh13/php-rtflex.png?branch=master)](https://travis-ci.org/Skyh13/php-rtflex)
 
 RTFLex is a simple lexer / tokenizer for RTF formatted data.
 
 ## Example Usage
 
-RTFLex allows you to easily extract plain text from an RTF formatted file.
-Here how you would do that:
+RTFLex allows you to easily extract plain text from an RTF formatted file, or a text
+string containing RTF formatting.
+Here's how you would read an RTF file:
 
     require_once "rtflex/RTFLexer.php";
 
