@@ -5,7 +5,7 @@ use RTFLex\tokenizer\RTFTokenizer;
 use RTFLex\tree\RTFDocument;
 
 
-class RTFDocumentTest extends BaseTest {
+class RTFDocumentTest extends PHPUnit_Framework_TestCase {
 
     private function getDocument($path) {
         $reader = new StreamReader($path);
@@ -40,6 +40,6 @@ class RTFDocumentTest extends BaseTest {
     public function testExtractText() {
         $expected = file_get_contents('tests/sample/hello-world.txt');
         $doc = $this->getDocument('tests/sample/hello-world.rtf');
-        $this->assertEquals($expected, $doc->extractText());
+        $this->assertEquals($expected, $doc->extractText(false, false));
     }
 }

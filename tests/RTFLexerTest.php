@@ -1,6 +1,6 @@
 <?php
 
-class RTFLexerTest extends BaseTest {
+class RTFLexerTest extends PHPUnit_Framework_TestCase {
 
     public function testDocumentFromFile() {
         $doc = RTFLexer::file('tests/sample/hello-world.rtf');

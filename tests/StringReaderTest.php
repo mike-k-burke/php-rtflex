@@ -3,7 +3,7 @@
 use RTFLex\io\StringReader;
 
 
-class StringReaderTest extends BaseTest {
+class StringReaderTest extends PHPUnit_Framework_TestCase {
 
     public function testReadByte() {
         $reader = new StringReader('Syn? A');

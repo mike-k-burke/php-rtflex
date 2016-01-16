@@ -5,7 +5,7 @@ use RTFLex\tokenizer\RTFTokenizer;
 use RTFLex\tokenizer\RTFToken;
 
 
-class RTFTokenizerTest extends BaseTest {
+class RTFTokenizerTest extends PHPUnit_Framework_TestCase {
 
     public function assertToken($token, $type, $name = null, $data = null) {
         $this->assertEquals($type, $token->getType(), "Token type is correct");
