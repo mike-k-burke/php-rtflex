@@ -66,7 +66,43 @@ class RTFTokenizer implements ITokenGenerator {
 
         // These are special cases to catch multi-character control symbols
         switch($word) {
+            case '\'hh':
+            case 'ab':
+            case 'acaps':
+            case 'acf':
+            case 'adn':
+            case 'aexpnd':
+            case 'af':
+            case 'afs':
+            case 'ai':
+            case 'alang':
+            case 'aoutl':
+            case 'ascaps':
+            case 'ashad':
+            case 'astrike':
+            case 'aul':
+            case 'auld':
+            case 'auldb':
+            case 'aulnone':
+            case 'aulw':
+            case 'aup':
+            case 'chbrdr':
+            case 'chshdng':
+            case 'chcfpat':
+            case 'chcbpat':
+            case 'chbghoriz':
+            case 'chbgvert':
+            case 'chbgfdiag':
+            case 'chbgbdiag':
+            case 'chbgcross':
+            case 'chbgdkhoriz':
+            case 'chbgdkvert':
+            case 'chbgdkfdiag':
+            case 'chbgdkbdiag':
+            case 'chbgdkcross':
+            case 'chbgdkdcross':
             case 'bullet':
+            case 'caps':
             case 'cell':
             case 'chatn':
             case 'chdate':
@@ -78,6 +114,7 @@ class RTFTokenizer implements ITokenGenerator {
             case 'chpgn':
             case 'chtime':
             case 'column':
+            case 'deleted':
             case 'emdash':
             case 'emspace':
             case 'endash':
@@ -96,8 +133,15 @@ class RTFTokenizer implements ITokenGenerator {
             case 'row':
             case 'rquote':
             case 'rtlmark':
+            case 'scaps':
+            case 'shad':
+            case 'strike':
+            case 'strikedl':
             case 'sect':
             case 'sectnum':
+            case 'softpage':
+            case 'softcol':
+            case 'softline':
             case 'tab':
             case 'zwbo *':
             case 'zwj':
