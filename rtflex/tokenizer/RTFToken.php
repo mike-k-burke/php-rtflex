@@ -52,54 +52,17 @@ class RTFToken {
                 case 'u-':
                 case "'":
                     return $this->uchr($this->data);
-                case 'bullet':
-                case 'cell':
-                case 'chatn':
-                case 'chdate':
-                case 'chdpa':
-                case 'chdpl':
-                case 'chftn':
-                case 'chftnsep':
-                case 'chftnsepc':
-                case 'chpgn':
-                case 'chtime':
-                case 'column':
-                    if($newlinesAsSpaces) {
-                        return ' ';
-                    } else {
-                        return "\n";
-                    }
-                case 'emdash':
-                case 'emspace':
-                case 'endash':
-                case 'enspace':
-                case 'lbrN ***':
-                case 'ldblquote':
-                case 'line':
-                case 'lquote':
-                case 'ltrmark':
-                case 'nestcell ***':
-                case 'nestrow ***':
-                    return '';
+
                 case 'page':
                 case 'par':
-                    if($newlinesAsSpaces) {
-                        return ' ';
-                    } else {
-                        return "\n";
-                    }
-                case 'qmspace *':
-                case 'rdblquote':
-                case 'row':
-                case 'rquote':
-                case 'rtlmark':
+                case 'column':
+                case 'line':
                 case 'sect':
-                case 'sectnum':
-                case 'tab':
-                case 'zwbo *':
-                case 'zwj':
-                case 'zwnbo *':
-                case 'zwnj':
+                case 'softpage':
+                case 'softcol':
+                case 'softline':
+                    return ($newlinesAsSpaces ? ' ' : "\n");
+
                 default:
                     break;
             }
