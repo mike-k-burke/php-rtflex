@@ -31,7 +31,7 @@ class RTFDocument {
 
     /**
      * @param ITokenGenerator $tokenizer
-     * @throws Exception
+     * @throws \Exception
      */
     protected function buildTree(ITokenGenerator $tokenizer) {
         // Wipe the stack
@@ -53,8 +53,8 @@ class RTFDocument {
     }
 
     /**
-     * @param $root
-     * @param $control
+     * @param RTFGroup $root
+     * @param string $control
      * @return null
      */
     private function findGroup($root, $control) {
@@ -98,8 +98,8 @@ class RTFDocument {
     }
 
     /**
-     * @param $token
-     * @throws Exception
+     * @param RTFToken $token
+     * @throws \Exception
      */
     protected function parseToken($token) {
         switch ($token->getType()) {
@@ -118,7 +118,7 @@ class RTFDocument {
             // End the active group
             case RTFToken::T_END_GROUP:
                 if (count($this->groupStack) == 0) {
-                    throw new Exception("Can not close group when open group doesn't exist");
+                    throw new \Exception("Can not close group when open group doesn't exist");
                 }
                 array_pop($this->groupStack);
                 break;
@@ -126,7 +126,7 @@ class RTFDocument {
             // Attach a control word to the active group
             case RTFToken::T_CONTROL_WORD:
                 if (count($this->groupStack) == 0) {
-                    throw new Exception("Can not use control word when open group doesn't exist");
+                    throw new \Exception("Can not use control word when open group doesn't exist");
                 }
                 $group = end($this->groupStack);
                 $group->pushControlWord($token);
@@ -136,7 +136,7 @@ class RTFDocument {
             case RTFToken::T_CONTROL_SYMBOL:
             case RTFToken::T_TEXT:
                 if (count($this->groupStack) == 0) {
-                    throw new Exception("Can not use content when open group doesn't exist");
+                    throw new \Exception("Can not use content when open group doesn't exist");
                 }
                 $group = end($this->groupStack);
                 $group->pushContent($token);
