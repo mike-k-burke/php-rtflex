@@ -1,7 +1,6 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          backupGlobals="true"
          backupStaticAttributes="true"
-         bootstrap="vendor/autoload.php"
          verbose="false"
          colors="true">
     <testsuites>
