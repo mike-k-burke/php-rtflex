@@ -5,7 +5,8 @@ namespace RTFLex\tree;
 use RTFLex\tokenizer\ITokenGenerator;
 use RTFLex\tokenizer\RTFToken;
 
-class RTFDocument {
+class RTFDocument
+{
     /**
      * @var array
      */
@@ -25,7 +26,8 @@ class RTFDocument {
     /**
      * @param ITokenGenerator $tokenizer
      */
-    public function __construct(ITokenGenerator $tokenizer) {
+    public function __construct(ITokenGenerator $tokenizer)
+    {
         $this->buildTree($tokenizer);
     }
 
@@ -33,7 +35,8 @@ class RTFDocument {
      * @param ITokenGenerator $tokenizer
      * @throws \Exception
      */
-    protected function buildTree(ITokenGenerator $tokenizer) {
+    protected function buildTree(ITokenGenerator $tokenizer)
+    {
         // Wipe the stack
         $this->groupStack = array();
         $this->rootGroup = null;
@@ -48,7 +51,8 @@ class RTFDocument {
      * @param bool|true $newlinesAsSpaces
      * @return string
      */
-    public function extractText($allowInvisible = false, $newlinesAsSpaces = true) {
+    public function extractText($allowInvisible = false, $newlinesAsSpaces = true)
+    {
         return $this->rootGroup->extractText($allowInvisible, $newlinesAsSpaces);
     }
 
@@ -57,8 +61,9 @@ class RTFDocument {
      * @param string $control
      * @return null
      */
-    private function findGroup($root, $control) {
-        if (!$root) {
+    private function findGroup($root, $control)
+    {
+        if (! $root) {
             return null;
         }
 
@@ -78,7 +83,8 @@ class RTFDocument {
     /**
      * @return null|RTFGroup
      */
-    private function getInfoGroup() {
+    private function getInfoGroup()
+    {
         if (is_null($this->metadataGroup)) {
             $this->metadataGroup = $this->findGroup($this->rootGroup, 'info');
         }
@@ -89,19 +95,21 @@ class RTFDocument {
      * @param $name
      * @return null|string
      */
-    public function getMetadata($name) {
+    public function getMetadata($name)
+    {
         $info = $this->getInfoGroup();
         $block = $this->findGroup($info, $name);
         return $block instanceof RTFGroup
-           ? trim($block->extractText($allowInvisible = true))
-           : null;
+            ? trim($block->extractText($allowInvisible = true))
+            : null;
     }
 
     /**
      * @param RTFToken $token
      * @throws \Exception
      */
-    protected function parseToken($token) {
+    protected function parseToken($token)
+    {
         switch ($token->getType()) {
             // Start a new Group
             case RTFToken::T_START_GROUP:

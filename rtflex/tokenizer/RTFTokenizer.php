@@ -1,10 +1,11 @@
 <?php
 
 namespace RTFLex\tokenizer;
+
 use RTFLex\io\IByteReader;
 
-
-class RTFTokenizer implements ITokenGenerator {
+class RTFTokenizer implements ITokenGenerator
+{
     const CONTROL_CHARS = '/[\\\\|\{\}]/';
     const CONTROL_WORD = '/[^0-9\\\\\{\}\s\*\-]/s';
     const CONTROL_WORD_DELIM = '/[\?\;]/';
@@ -20,14 +21,16 @@ class RTFTokenizer implements ITokenGenerator {
     /**
      * @param IByteReader $reader
      */
-    public function __construct(IByteReader $reader) {
+    public function __construct(IByteReader $reader)
+    {
         $this->reader = $reader;
     }
 
     /**
      * @return array
      */
-    private function readControlWord() {
+    private function readControlWord()
+    {
         if ($this->reader->lookAhead() == "\n") {
             return array(RTFToken::T_TEXT, null, $this->reader->readByte());
         }
@@ -42,10 +45,9 @@ class RTFTokenizer implements ITokenGenerator {
         }
 
         $param = '';
-        if(!empty($word)) {
+        $isHex = false;
+        if (! empty($word)) {
             $isHex = ($word[0] == self::HEX_BYTE);
-        } else {
-            $isHex = false;
         }
 
         $paramEncoding = $isHex ? self::HEX : self::NUMERIC;
@@ -59,18 +61,18 @@ class RTFTokenizer implements ITokenGenerator {
         }
 
         // Swallow the control word delim
-        $swallow = empty($param) && !preg_match(self::CONTROL_CHARS, $this->reader->lookAhead());
-        $swallow = $swallow || preg_match(self::CONTROL_WORD_DELIM, $this->reader->lookAhead());
-        if ($swallow) {
+        if ((empty($param) && ! preg_match(self::CONTROL_CHARS, $this->reader->lookAhead())) ||
+            preg_match(self::CONTROL_WORD_DELIM, $this->reader->lookAhead())
+        ) {
             $this->reader->readByte();
         }
 
-        $param = $param == '' ? null : $param;
+        $param = $param === '' ? null : $param;
         $param = is_numeric($param) ? (int)$param : null;
         $type = strlen($word) > 1 ? RTFToken::T_CONTROL_WORD : RTFToken::T_CONTROL_SYMBOL;
 
         // These are special cases to catch multi-character control symbols
-        switch($word) {
+        switch ($word) {
             case '\'hh':
             case 'ab':
             case 'acaps':
@@ -165,17 +167,19 @@ class RTFTokenizer implements ITokenGenerator {
      * @param $start
      * @return string
      */
-    private function readText($start) {
+    private function readText($start)
+    {
+        if ($start == '\\') {
+            return $start;
+        }
+
         $buffer = $start;
-        $last = $start;
 
         while (true) {
             $n0 = $this->reader->lookAhead();
             if ($n0 === false) {
                 break;
-            }
-
-            if (preg_match(self::CONTROL_CHARS, $n0) && $last != '\\') {
+            } elseif (preg_match(self::CONTROL_CHARS, $n0)) {
                 break;
             }
 
@@ -188,26 +192,27 @@ class RTFTokenizer implements ITokenGenerator {
     /**
      * @return bool|RTFToken
      */
-    public function readToken() {
+    public function readToken()
+    {
         $byte = $this->reader->readByte();
         if ($byte === false) {
             return false;
         }
 
         switch ($byte) {
-            case "{":
+            case '{':
                 return new RTFToken(RTFToken::T_START_GROUP);
 
-            case "}":
+            case '}':
                 return new RTFToken(RTFToken::T_END_GROUP);
 
-            case "\\":
+            case '\\':
                 list($type, $word, $param) = $this->readControlWord();
                 return new RTFToken($type, $word, $param);
 
             default:
                 $str = $this->readText($byte);
-                if (strlen((trim($str))) === 0) {
+                if ((trim($str)) === '') {
                     return $this->readToken();
                 }
                 return new RTFToken(RTFToken::T_TEXT, null, $str);
