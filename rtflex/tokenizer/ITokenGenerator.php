@@ -2,10 +2,11 @@
 
 namespace RTFLex\tokenizer;
 
-interface ITokenGenerator {
+interface ITokenGenerator
+{
 
-   /**
-    * @return mixed
-    */
-   public function readToken();
+    /**
+     * @return mixed
+     */
+    public function readToken();
 }

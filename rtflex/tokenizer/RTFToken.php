@@ -3,7 +3,8 @@
 namespace RTFLex\tokenizer;
 
 
-class RTFToken {
+class RTFToken
+{
     const T_START_GROUP = 1;
     const T_END_GROUP = 2;
     const T_CONTROL_WORD = 3;
@@ -30,7 +31,8 @@ class RTFToken {
      * @param null $name
      * @param null $data
      */
-    public function __construct($type, $name = null, $data = null) {
+    public function __construct($type, $name = null, $data = null)
+    {
         $this->type = $type;
         $this->name = $name;
         $this->data = $data;
@@ -41,8 +43,9 @@ class RTFToken {
      * @param bool|true $newlinesAsSpaces
      * @return null|string
      */
-    public function extractText($allowInvisible = false, $newlinesAsSpaces = true) {
-        if ($this->type == self::T_TEXT)  {
+    public function extractText($allowInvisible = false, $newlinesAsSpaces = true)
+    {
+        if ($this->type == self::T_TEXT) {
             return $this->data;
         }
 
@@ -50,7 +53,7 @@ class RTFToken {
             switch ($this->name) {
                 case 'u':
                 case 'u-':
-                case "'":
+                case '\'':
                     return $this->uchr($this->data);
 
                 case 'page':
@@ -67,30 +70,33 @@ class RTFToken {
                     break;
             }
 
-            return "";
+            return '';
         }
 
-        return "";
+        return '';
     }
 
     /**
      * @return null|string
      */
-    public function getData() {
+    public function getData()
+    {
         return $this->data;
     }
 
     /**
      * @return null|string
      */
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
     /**
      * @return string
      */
-    public function getType() {
+    public function getType()
+    {
         return $this->type;
     }
 
@@ -102,7 +108,8 @@ class RTFToken {
      * @param $code
      * @return string
      */
-    protected function uchr($code) {
+    protected function uchr($code)
+    {
         $code = (int)$code;
         if ($code < 0) {
             $offset = pow(2, 15);

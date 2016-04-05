@@ -3,7 +3,8 @@
 namespace RTFLex\io;
 
 
-interface IByteReader {
+interface IByteReader
+{
 
     /**
      * @return mixed
