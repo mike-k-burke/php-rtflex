@@ -112,12 +112,12 @@ class RTFDocument {
                 } else {
                     $this->rootGroup = $group;
                 }
-                array_push($this->groupStack, $group);
+                $this->groupStack[] = $group;
                 break;
 
             // End the active group
             case RTFToken::T_END_GROUP:
-                if (count($this->groupStack) == 0) {
+                if (empty($this->groupStack)) {
                     throw new \Exception("Can not close group when open group doesn't exist");
                 }
                 array_pop($this->groupStack);
@@ -125,7 +125,7 @@ class RTFDocument {
 
             // Attach a control word to the active group
             case RTFToken::T_CONTROL_WORD:
-                if (count($this->groupStack) == 0) {
+                if (empty($this->groupStack)) {
                     throw new \Exception("Can not use control word when open group doesn't exist");
                 }
                 $group = end($this->groupStack);
@@ -135,7 +135,7 @@ class RTFDocument {
             // Add content into the active group
             case RTFToken::T_CONTROL_SYMBOL:
             case RTFToken::T_TEXT:
-                if (count($this->groupStack) == 0) {
+                if (empty($this->groupStack)) {
                     throw new \Exception("Can not use content when open group doesn't exist");
                 }
                 $group = end($this->groupStack);

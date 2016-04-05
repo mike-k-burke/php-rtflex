@@ -5,12 +5,12 @@ use RTFLex\io\IByteReader;
 
 
 class RTFTokenizer implements ITokenGenerator {
-    const CONTROL_CHARS = "/[\\\\|\{\}]/";
-    const CONTROL_WORD = "/[^0-9\\\\\{\}\s\*\-]/s";
-    const CONTROL_WORD_DELIM = "/[\?\;]/";
-    const NUMERIC = "/[\-0-9]/";
-    const HEX = "/[\-0-9A-F]/i";
-    const HEX_BYTE = "'";
+    const CONTROL_CHARS = '/[\\\\|\{\}]/';
+    const CONTROL_WORD = '/[^0-9\\\\\{\}\s\*\-]/s';
+    const CONTROL_WORD_DELIM = '/[\?\;]/';
+    const NUMERIC = '/[\-0-9]/';
+    const HEX = '/[\-0-9A-F]/i';
+    const HEX_BYTE = '\'';
 
     /**
      * @var IByteReader
@@ -32,7 +32,7 @@ class RTFTokenizer implements ITokenGenerator {
             return array(RTFToken::T_TEXT, null, $this->reader->readByte());
         }
 
-        $word = "";
+        $word = '';
         while (preg_match(self::CONTROL_WORD, $this->reader->lookAhead())) {
             $byte = $this->reader->readByte();
             $word .= $byte;
@@ -41,8 +41,13 @@ class RTFTokenizer implements ITokenGenerator {
             }
         }
 
-        $param = "";
-        $isHex = strpos($word, self::HEX_BYTE) === 0;
+        $param = '';
+        if(!empty($word)) {
+            $isHex = ($word[0] == self::HEX_BYTE);
+        } else {
+            $isHex = false;
+        }
+
         $paramEncoding = $isHex ? self::HEX : self::NUMERIC;
         while (preg_match($paramEncoding, $this->reader->lookAhead())) {
             $param .= $this->reader->readByte();
@@ -60,7 +65,7 @@ class RTFTokenizer implements ITokenGenerator {
             $this->reader->readByte();
         }
 
-        $param = strlen($param) == 0 ? null : $param;
+        $param = $param == '' ? null : $param;
         $param = is_numeric($param) ? (int)$param : null;
         $type = strlen($word) > 1 ? RTFToken::T_CONTROL_WORD : RTFToken::T_CONTROL_SYMBOL;
 
@@ -170,7 +175,7 @@ class RTFTokenizer implements ITokenGenerator {
                 break;
             }
 
-            if (preg_match(self::CONTROL_CHARS, $n0) && $last != "\\") {
+            if (preg_match(self::CONTROL_CHARS, $n0) && $last != '\\') {
                 break;
             }
 

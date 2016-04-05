@@ -136,7 +136,7 @@ class RTFGroup {
             throw new \Exception("Content must be either T_CONTROL_SYMBOL or T_TEXT");
         }
 
-        array_push($this->content, $token);
+        $this->content[] = $token;
     }
 
     /**
@@ -148,7 +148,7 @@ class RTFGroup {
             throw new \Exception("Incorrect token type");
         }
 
-        array_push($this->controls, $token);
+        $this->controls[] = $token;
     }
 
     /**
@@ -156,7 +156,7 @@ class RTFGroup {
      */
     public function pushGroup(RTFGroup $group) {
         $group->setParent($this);
-        array_push($this->content, $group);
+        $this->content[] = $group;
     }
 
     /**

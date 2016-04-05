@@ -7,6 +7,8 @@ class StringReader implements IByteReader {
     private $index = 0;
     private $string = null;
     private $size;
+    private $lookAheadCache = null;
+    private $cacheOffset = null;
 
     /**
      * StringReader constructor.
@@ -15,6 +17,8 @@ class StringReader implements IByteReader {
     public function __construct($string) {
         $this->string = $string;
         $this->size = mb_strlen($string);
+        $this->lookAheadCache = null;
+        $this->cacheOffset = null;
     }
 
     /**
@@ -31,9 +35,12 @@ class StringReader implements IByteReader {
      * @return bool|string
      */
     public function lookAhead($offset = 0) {
-        $pos = $this->index + $offset;
-        $byte = mb_substr($this->string, $pos, 1);
-        return mb_strlen($byte) == 0 ? false : $byte;
+        if(is_null($this->lookAheadCache) || ($offset != $this->cacheOffset)) {
+            $pos = $this->index + $offset;
+            $this->lookAheadCache = mb_substr($this->string, $pos, 1);
+            $this->cacheOffset = $offset;
+        }
+        return $this->lookAheadCache == '' ? false : $this->lookAheadCache;
     }
 
     /**
@@ -42,6 +49,8 @@ class StringReader implements IByteReader {
     public function readByte() {
         $byte = $this->lookAhead();
         $this->index++;
+        $this->lookAheadCache = null;
+        $this->cacheOffset = null;
         return $byte;
     }
 }

@@ -10,6 +10,8 @@ class StreamReader implements IByteReader {
     private $file;
     private $handle;
     private $size;
+    private $lookAheadCache = null;
+    private $cacheOffset = null;
 
     /**
      * StreamReader constructor.
@@ -21,6 +23,8 @@ class StreamReader implements IByteReader {
 
         $stats = fstat($this->handle);
         $this->size = $stats['size'];
+        $this->lookAheadCache = null;
+        $this->cacheOffset = null;
     }
 
     /**
@@ -35,9 +39,12 @@ class StreamReader implements IByteReader {
      * @return bool|string
      */
     public function lookAhead($offset = 0) {
-        fseek($this->handle, $this->index + $offset);
-        $byte = fread($this->handle, 1);
-        return strlen($byte) == 0 ? false : $byte;
+        if(is_null($this->lookAheadCache) || ($offset != $this->cacheOffset)) {
+            fseek($this->handle, $this->index + $offset);
+            $this->lookAheadCache = fread($this->handle, 1);
+            $this->cacheOffset = $offset;
+        }
+        return strlen($this->lookAheadCache) == 0 ? false : $this->lookAheadCache;
     }
 
     /**
@@ -46,6 +53,8 @@ class StreamReader implements IByteReader {
     public function readByte() {
         $byte = $this->lookAhead();
         $this->index++;
+        $this->lookAheadCache = null;
+        $this->cacheOffset = null;
         return $byte;
     }
 }
