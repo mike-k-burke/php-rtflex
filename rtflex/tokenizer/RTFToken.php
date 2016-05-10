@@ -56,6 +56,9 @@ class RTFToken
                 case '\'':
                     return $this->uchr($this->data);
 
+                case '~':
+                    return ' ';
+
                 case 'page':
                 case 'par':
                 case 'column':

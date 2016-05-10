@@ -360,12 +360,12 @@ class RTFGroup
     public function isPrintableText()
     {
         foreach($this->controls as $control) {
-            if(isset(RTFGroup::$nonPrintableWords[$control->getName()])) {
-                return false;
+            if(! isset(RTFGroup::$nonPrintableWords[$control->getName()])) {
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -391,8 +391,8 @@ class RTFGroup
     public function pushContent(RTFToken $token)
     {
         $type = $token->getType();
-        if ($type != RTFToken::T_CONTROL_SYMBOL && $type != RTFToken::T_TEXT) {
-            throw new \Exception("Content must be either T_CONTROL_SYMBOL or T_TEXT");
+        if ($type != RTFToken::T_CONTROL_SYMBOL && $type != RTFToken::T_TEXT && $type != RTFToken::T_CONTROL_WORD) {
+            throw new \Exception("Content must be either T_CONTROL_SYMBOL or T_TEXT or T_CONTROL_WORD");
         }
 
         $this->content[] = $token;

@@ -8,15 +8,47 @@ class RTFTokenizer implements ITokenGenerator
 {
     const CONTROL_CHARS = '/[\\\\|\{\}]/';
     const CONTROL_WORD = '/[^0-9\\\\\{\}\s\*\-]/s';
-    const CONTROL_WORD_DELIM = '/[\?\;]/';
+    const CONTROL_WORD_DELIM = '/[\?\;\ ]/';
     const NUMERIC = '/[\-0-9]/';
     const HEX = '/[\-0-9A-F]/i';
     const HEX_BYTE = '\'';
+
+    // Put custom delimiter patterns here
+    const COLORTBL_DELIM = '/[\;]/';
 
     /**
      * @var IByteReader
      */
     private $reader;
+
+    /**
+     * Map certain control words to custom delimiter patterns
+     *
+     * @var array
+     */
+    private $ctrlWordDelimMap = [
+        'colortbl' => self::COLORTBL_DELIM,
+        'red' => self::COLORTBL_DELIM,
+        'green' => self::COLORTBL_DELIM,
+        'blue' => self::COLORTBL_DELIM,
+        'ctint' => self::COLORTBL_DELIM,
+        'cshade' => self::COLORTBL_DELIM,
+        'cmaindarkone' => self::COLORTBL_DELIM,
+        'cmainlightone' => self::COLORTBL_DELIM,
+        'cmaindarktwo' => self::COLORTBL_DELIM,
+        'cmainlighttwo' => self::COLORTBL_DELIM,
+        'caccentone' => self::COLORTBL_DELIM,
+        'caccenttwo' => self::COLORTBL_DELIM,
+        'caccentthree' => self::COLORTBL_DELIM,
+        'caccentfour' => self::COLORTBL_DELIM,
+        'caccentfive' => self::COLORTBL_DELIM,
+        'caccentsix' => self::COLORTBL_DELIM,
+        'chyperlink' => self::COLORTBL_DELIM,
+        'cfollowedhyperlink' => self::COLORTBL_DELIM,
+        'cbackgroundone' => self::COLORTBL_DELIM,
+        'ctextone' => self::COLORTBL_DELIM,
+        'ctextwo' => self::COLORTBL_DELIM,
+    ];
 
     /**
      * @param IByteReader $reader
@@ -26,15 +58,20 @@ class RTFTokenizer implements ITokenGenerator
         $this->reader = $reader;
     }
 
+    private function getControlWordDelims($controlWord)
+    {
+        if (isset($this->ctrlWordDelimMap[$controlWord])) {
+            return $this->ctrlWordDelimMap[$controlWord];
+        }
+
+        return self::CONTROL_WORD_DELIM;
+    }
+
     /**
      * @return array
      */
     private function readControlWord()
     {
-        if ($this->reader->lookAhead() == "\n") {
-            return array(RTFToken::T_TEXT, null, $this->reader->readByte());
-        }
-
         $word = '';
         while (preg_match(self::CONTROL_WORD, $this->reader->lookAhead())) {
             $byte = $this->reader->readByte();
@@ -60,104 +97,28 @@ class RTFTokenizer implements ITokenGenerator
             $param = hexdec($param);
         }
 
-        // Swallow the control word delim
+        // Swallow excess characters
+        while (! preg_match($this->getControlWordDelims($word), $this->reader->lookAhead()) &&
+            ! preg_match(self::CONTROL_CHARS, $this->reader->lookAhead())) {
+            $this->reader->readByte();
+        }
+
+        // Swallow the control word delimiter
         if ((empty($param) && ! preg_match(self::CONTROL_CHARS, $this->reader->lookAhead())) ||
-            preg_match(self::CONTROL_WORD_DELIM, $this->reader->lookAhead())
-        ) {
+            preg_match($this->getControlWordDelims($word), $this->reader->lookAhead())) {
             $this->reader->readByte();
         }
 
         $param = $param === '' ? null : $param;
         $param = is_numeric($param) ? (int)$param : null;
-        $type = strlen($word) > 1 ? RTFToken::T_CONTROL_WORD : RTFToken::T_CONTROL_SYMBOL;
 
-        // These are special cases to catch multi-character control symbols
         switch ($word) {
-            case '\'hh':
-            case 'ab':
-            case 'acaps':
-            case 'acf':
-            case 'adn':
-            case 'aexpnd':
-            case 'af':
-            case 'afs':
-            case 'ai':
-            case 'alang':
-            case 'aoutl':
-            case 'ascaps':
-            case 'ashad':
-            case 'astrike':
-            case 'aul':
-            case 'auld':
-            case 'auldb':
-            case 'aulnone':
-            case 'aulw':
-            case 'aup':
-            case 'chbrdr':
-            case 'chshdng':
-            case 'chcfpat':
-            case 'chcbpat':
-            case 'chbghoriz':
-            case 'chbgvert':
-            case 'chbgfdiag':
-            case 'chbgbdiag':
-            case 'chbgcross':
-            case 'chbgdkhoriz':
-            case 'chbgdkvert':
-            case 'chbgdkfdiag':
-            case 'chbgdkbdiag':
-            case 'chbgdkcross':
-            case 'chbgdkdcross':
-            case 'bullet':
-            case 'caps':
-            case 'cell':
-            case 'chatn':
-            case 'chdate':
-            case 'chdpa':
-            case 'chdpl':
-            case 'chftn':
-            case 'chftnsep':
-            case 'chftnsepc':
-            case 'chpgn':
-            case 'chtime':
-            case 'column':
-            case 'deleted':
-            case 'emdash':
-            case 'emspace':
-            case 'endash':
-            case 'enspace':
-            case 'lbrN ***':
-            case 'ldblquote':
-            case 'line':
-            case 'lquote':
-            case 'ltrmark':
-            case 'nestcell ***':
-            case 'nestrow ***':
-            case 'page':
-            case 'par':
-            case 'qmspace *':
-            case 'rdblquote':
-            case 'row':
-            case 'rquote':
-            case 'rtlmark':
-            case 'scaps':
-            case 'shad':
-            case 'strike':
-            case 'strikedl':
-            case 'sect':
-            case 'sectnum':
-            case 'softpage':
-            case 'softcol':
-            case 'softline':
-            case 'tab':
-            case 'zwbo *':
-            case 'zwj':
-            case 'zwnbo *':
-            case 'zwnj':
+            case '\'':
                 $type = RTFToken::T_CONTROL_SYMBOL;
                 break;
+
             default:
-                break;
+                $type = RTFToken::T_CONTROL_WORD;
         }
 
         return array($type, $word, $param);
@@ -207,8 +168,16 @@ class RTFTokenizer implements ITokenGenerator
                 return new RTFToken(RTFToken::T_END_GROUP);
 
             case '\\':
-                list($type, $word, $param) = $this->readControlWord();
-                return new RTFToken($type, $word, $param);
+                $byte = $this->reader->lookAhead();
+
+                // Check for Control Symbol
+                if (! ctype_alnum($byte) && $byte != '\'') {
+                    $byte = $this->reader->readByte();
+                    return new RTFToken(RTFToken::T_CONTROL_SYMBOL, $byte, null);
+                } else {
+                    list($type, $word, $param) = $this->readControlWord();
+                    return new RTFToken($type, $word, $param);
+                }
 
             default:
                 $str = $this->readText($byte);
