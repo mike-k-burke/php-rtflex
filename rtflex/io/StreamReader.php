@@ -48,7 +48,7 @@ class StreamReader implements IByteReader
             $this->lookAheadCache = fread($this->handle, 1);
             $this->cacheOffset = $offset;
         }
-        return $this->lookAheadCache === '' ? false : $this->lookAheadCache;
+        return strlen($this->lookAheadCache) == 0 ? false : $this->lookAheadCache;
     }
 
     /**
@@ -62,4 +62,20 @@ class StreamReader implements IByteReader
         $this->cacheOffset = null;
         return $byte;
     }
+
+    /**
+     * @param $regexDelim
+     * @return string
+     */
+    public function getToken($regexDelim)
+    {
+        $buffer = '';
+
+        while (($temp = $this->lookAhead()) !== false && ! preg_match($regexDelim, $temp)) {
+            $buffer .= $this->readByte();
+        }
+
+        return $buffer;
+    }
+
 }

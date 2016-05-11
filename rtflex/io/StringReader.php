@@ -40,11 +40,10 @@ class StringReader implements IByteReader
     public function lookAhead($offset = 0)
     {
         if (is_null($this->lookAheadCache) || ($offset != $this->cacheOffset)) {
-            $pos = $this->index + $offset;
-            $this->lookAheadCache = mb_substr($this->string, $pos, 1);
+            $this->lookAheadCache = mb_substr($this->string, $this->index + $offset, 1);
             $this->cacheOffset = $offset;
         }
-        return $this->lookAheadCache === '' ? false : $this->lookAheadCache;
+        return strlen($this->lookAheadCache) == 0 ? false : $this->lookAheadCache;
     }
 
     /**
@@ -57,5 +56,22 @@ class StringReader implements IByteReader
         $this->lookAheadCache = null;
         $this->cacheOffset = null;
         return $byte;
+    }
+
+    /**
+     * @param $regexDelim
+     * @return string
+     */
+    public function getToken($regexDelim)
+    {
+        $token = '';
+        if(preg_match($regexDelim, $this->string, $matches, PREG_OFFSET_CAPTURE, $this->index)) {
+            $token = mb_substr($this->string, $this->index, $matches[0][1] - $this->index);
+            $this->index = $matches[0][1];
+            $this->lookAheadCache = null;
+            $this->cacheOffset = null;
+        };
+
+        return $token;
     }
 }

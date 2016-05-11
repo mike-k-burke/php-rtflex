@@ -21,4 +21,10 @@ interface IByteReader
      * @return mixed
      */
     public function readByte();
+
+    /**
+     * @param $regexDelim
+     * @return mixed
+     */
+    public function getToken($regexDelim);
 }

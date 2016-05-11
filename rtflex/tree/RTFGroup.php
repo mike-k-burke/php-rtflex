@@ -360,12 +360,12 @@ class RTFGroup
     public function isPrintableText()
     {
         foreach($this->controls as $control) {
-            if(! isset(RTFGroup::$nonPrintableWords[$control->getName()])) {
-                return true;
+            if(isset(RTFGroup::$nonPrintableWords[$control->getName()])) {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     /**
