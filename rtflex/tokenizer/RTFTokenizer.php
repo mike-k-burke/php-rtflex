@@ -48,6 +48,7 @@ class RTFTokenizer implements ITokenGenerator
         'cbackgroundone' => self::COLORTBL_DELIM,
         'ctextone' => self::COLORTBL_DELIM,
         'ctextwo' => self::COLORTBL_DELIM,
+        self::HEX_BYTE => '',
     ];
 
     /**
@@ -97,23 +98,28 @@ class RTFTokenizer implements ITokenGenerator
             $param = hexdec($param);
         }
 
-        // Swallow excess characters
-        while (! preg_match($this->getControlWordDelims($word), $this->reader->lookAhead()) &&
-            ! preg_match(self::CONTROL_CHARS, $this->reader->lookAhead())) {
-            $this->reader->readByte();
-        }
+        if (! empty($this->getControlWordDelims($word))) {
+            // Swallow excess characters
+            while (! preg_match($this->getControlWordDelims($word), $this->reader->lookAhead()) &&
+                ! preg_match(self::CONTROL_CHARS, $this->reader->lookAhead())) {
+                $this->reader->readByte();
+            }
 
-        // Swallow the control word delimiter
-        if ((empty($param) && ! preg_match(self::CONTROL_CHARS, $this->reader->lookAhead())) ||
-            preg_match($this->getControlWordDelims($word), $this->reader->lookAhead())) {
-            $this->reader->readByte();
+            // Swallow the control word delimiter
+            if ((empty($param) && ! preg_match(self::CONTROL_CHARS, $this->reader->lookAhead())) ||
+                preg_match($this->getControlWordDelims($word), $this->reader->lookAhead())
+            ) {
+                $this->reader->readByte();
+            }
         }
 
         $param = $param === '' ? null : $param;
         $param = is_numeric($param) ? (int)$param : null;
 
         switch ($word) {
-            case '\'':
+            case 'u':
+            case 'u-':
+            case self::HEX_BYTE:
                 $type = RTFToken::T_CONTROL_SYMBOL;
                 break;
 
@@ -171,7 +177,7 @@ class RTFTokenizer implements ITokenGenerator
                 $byte = $this->reader->lookAhead();
 
                 // Check for Control Symbol
-                if (! ctype_alnum($byte) && $byte != '\'') {
+                if (! ctype_alnum($byte) && $byte != self::HEX_BYTE) {
                     $byte = $this->reader->readByte();
                     return new RTFToken(RTFToken::T_CONTROL_SYMBOL, $byte, null);
                 } else {
