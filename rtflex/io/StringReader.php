@@ -6,8 +6,8 @@ namespace RTFLex\io;
 class StringReader implements IByteReader
 {
     private $index = 0;
+    private $byteIndex = 0;
     private $string = null;
-    private $size;
     private $lookAheadCache = null;
     private $cacheOffset = null;
 
@@ -18,7 +18,6 @@ class StringReader implements IByteReader
     public function __construct($string)
     {
         $this->string = $string;
-        $this->size = mb_strlen($string);
         $this->lookAheadCache = null;
         $this->cacheOffset = null;
     }
@@ -30,7 +29,7 @@ class StringReader implements IByteReader
     {
         $this->string = null;
         $this->index = 0;
-        $this->size = null;
+        $this->byteIndex = 0;
     }
 
     /**
@@ -53,6 +52,7 @@ class StringReader implements IByteReader
     {
         $byte = $this->lookAhead();
         $this->index++;
+        $this->byteIndex += mb_strlen($byte);
         $this->lookAheadCache = null;
         $this->cacheOffset = null;
         return $byte;
@@ -65,9 +65,10 @@ class StringReader implements IByteReader
     public function getToken($regexDelim)
     {
         $token = '';
-        if(preg_match($regexDelim, $this->string, $matches, PREG_OFFSET_CAPTURE, $this->index)) {
-            $token = mb_substr($this->string, $this->index, $matches[0][1] - $this->index);
-            $this->index = $matches[0][1];
+        if(preg_match($regexDelim, $this->string, $matches, PREG_OFFSET_CAPTURE, $this->byteIndex)) {
+            $token = substr($this->string, $this->byteIndex, $matches[0][1] - $this->byteIndex);
+            $this->index += mb_strlen($token);
+            $this->byteIndex = $matches[0][1];
             $this->lookAheadCache = null;
             $this->cacheOffset = null;
         };
