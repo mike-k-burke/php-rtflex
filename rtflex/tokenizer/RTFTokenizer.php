@@ -9,7 +9,7 @@ class RTFTokenizer implements ITokenGenerator
     const CONTROL_CHARS = '/[\\\\|\{\}]/';
     const CONTROL_WORD = '/[^0-9\\\\\{\}\s\*\-]/s';
     const CONTROL_WORD_DELIM = '/[\?\;\ ]/';
-    const CONTROL_WORD_TOKEN = '/[0-9\\\\\{\}\s\*\-\ \']/s';
+    const CONTROL_WORD_TOKEN = '/[0-9\\\\\{\}\s\*\-\ \\\']/s';
     const HEX_TOKEN = '/[^\-0-9A-F]/i';
     const NUMERIC_TOKEN = '/[^\-0-9]/';
     const HEX_BYTE = '\'';
