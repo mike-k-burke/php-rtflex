@@ -9,7 +9,9 @@ class StringReader implements IByteReader
     private $byteIndex = 0;
     private $string = null;
     private $lookAheadCache = null;
-    private $cacheOffset = null;
+    private $cacheIndex = 0;
+
+    const CACHE_SIZE = 2000;
 
     /**
      * StringReader constructor.
@@ -18,8 +20,13 @@ class StringReader implements IByteReader
     public function __construct($string)
     {
         $this->string = $string;
-        $this->lookAheadCache = null;
-        $this->cacheOffset = null;
+
+        $this->lookAheadCache = preg_split('//u', mb_substr($this->string, $this->index, self::CACHE_SIZE),
+            self::CACHE_SIZE, PREG_SPLIT_NO_EMPTY);
+
+        if (! isset($this->lookAheadCache[$this->cacheIndex])) {
+            $this->lookAheadCache[$this->cacheIndex] = false;
+        }
     }
 
     /**
@@ -36,13 +43,19 @@ class StringReader implements IByteReader
      * @param int $offset
      * @return bool|string
      */
-    public function lookAhead($offset = 0)
+    public function lookAheadOffset($offset = 0)
     {
-        if (is_null($this->lookAheadCache) || ($offset != $this->cacheOffset)) {
-            $this->lookAheadCache = mb_substr($this->string, $this->index + $offset, 1);
-            $this->cacheOffset = $offset;
-        }
-        return strlen($this->lookAheadCache) == 0 ? false : $this->lookAheadCache;
+        $char = mb_substr($this->string, $this->index + $offset, 1);
+
+        return strlen($char) == 0 ? false : $char;
+    }
+
+    /**
+     * @return bool|string
+     */
+    public function lookAhead()
+    {
+        return $this->lookAheadCache[$this->cacheIndex];
     }
 
     /**
@@ -52,9 +65,19 @@ class StringReader implements IByteReader
     {
         $byte = $this->lookAhead();
         $this->index++;
+        $this->cacheIndex++;
         $this->byteIndex += mb_strlen($byte);
-        $this->lookAheadCache = null;
-        $this->cacheOffset = null;
+
+        if ($this->cacheIndex >= self::CACHE_SIZE) {
+            $this->cacheIndex = 0;
+            $this->lookAheadCache = preg_split('//u', mb_substr($this->string, $this->index, self::CACHE_SIZE),
+                self::CACHE_SIZE, PREG_SPLIT_NO_EMPTY);
+        }
+
+        if (! isset($this->lookAheadCache[$this->cacheIndex])) {
+            $this->lookAheadCache[$this->cacheIndex] = false;
+        }
+
         return $byte;
     }
 
@@ -65,12 +88,21 @@ class StringReader implements IByteReader
     public function getToken($regexDelim)
     {
         $token = '';
-        if(preg_match($regexDelim, $this->string, $matches, PREG_OFFSET_CAPTURE, $this->byteIndex)) {
+        if (preg_match($regexDelim, $this->string, $matches, PREG_OFFSET_CAPTURE, $this->byteIndex)) {
             $token = substr($this->string, $this->byteIndex, $matches[0][1] - $this->byteIndex);
             $this->index += mb_strlen($token);
             $this->byteIndex = $matches[0][1];
-            $this->lookAheadCache = null;
-            $this->cacheOffset = null;
+            $this->cacheIndex += mb_strlen($token);
+
+            if ($this->cacheIndex >= self::CACHE_SIZE) {
+                $this->cacheIndex = 0;
+                $this->lookAheadCache = preg_split('//u', mb_substr($this->string, $this->index, self::CACHE_SIZE),
+                    self::CACHE_SIZE, PREG_SPLIT_NO_EMPTY);
+            }
+
+            if (! isset($this->lookAheadCache[$this->cacheIndex])) {
+                $this->lookAheadCache[$this->cacheIndex] = false;
+            }
         };
 
         return $token;
