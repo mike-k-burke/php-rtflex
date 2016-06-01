@@ -15,7 +15,12 @@ interface IByteReader
      * @param int $offset
      * @return mixed
      */
-    public function lookAhead($offset = 0);
+    public function lookAheadOffset($offset = 0);
+
+    /**
+     * @return mixed
+     */
+    public function lookAhead();
 
     /**
      * @return mixed

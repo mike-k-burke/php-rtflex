@@ -6,7 +6,8 @@ interface ITokenGenerator
 {
 
     /**
+     * @param bool $isGroupOpen
      * @return mixed
      */
-    public function readToken();
+    public function readToken($isGroupOpen = false);
 }

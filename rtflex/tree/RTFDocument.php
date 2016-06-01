@@ -4,6 +4,7 @@ namespace RTFLex\tree;
 
 use RTFLex\tokenizer\ITokenGenerator;
 use RTFLex\tokenizer\RTFToken;
+use RTFLex\tokenizer\RTFTokenizer;
 
 class RTFDocument
 {
@@ -41,9 +42,13 @@ class RTFDocument
         $this->groupStack = array();
         $this->rootGroup = null;
 
-        while ($t = $tokenizer->readToken()) {
+        do {
+            $t = $tokenizer->readToken(! empty($this->groupStack));
+            if ($t === null || $t === false) {
+                continue;
+            }
             $this->parseToken($t);
-        }
+        } while ($t !== false);
     }
 
     /**
@@ -138,54 +143,12 @@ class RTFDocument
                 }
                 $group = end($this->groupStack);
 
-                switch($token->getName()) {
-                    case 'page':
-                    case 'par':
-                    case 'column':
-                    case 'line':
-                    case 'sect':
-                    case 'softpage':
-                    case 'softcol':
-                    case 'softline':
-                    case 'bullet':
-                    case 'cell':
-                    case 'chatn':
-                    case 'chdate':
-                    case 'chdpa':
-                    case 'chdpl':
-                    case 'chftn':
-                    case 'chftnsep':
-                    case 'chftnsepc':
-                    case 'chpgn':
-                    case 'chtime':
-                    case 'emdash':
-                    case 'emspace':
-                    case 'endash':
-                    case 'enspace':
-                    case 'lbrN ***':
-                    case 'ldblquote':
-                    case 'lquote':
-                    case 'ltrmark':
-                    case 'nestcell ***':
-                    case 'nestrow ***':
-                    case 'qmspace *':
-                    case 'rdblquote':
-                    case 'row':
-                    case 'rquote':
-                    case 'rtlmark':
-                    case 'sectnum':
-                    case 'tab':
-                    case 'zwbo *':
-                    case 'zwj':
-                    case 'zwnbo *':
-                    case 'zwnj':
-                        $group->pushContent($token);
-                        break;
-                    
-                    default:
-                        $group->pushControlWord($token);
+                if (isset(RTFTokenizer::$contentControlWords[$token->getName()])) {
+                    $group->pushContent($token);
+                } else {
+                    $group->pushControlWord($token);
                 }
-                
+
                 break;
 
             // Add content into the active group
