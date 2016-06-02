@@ -2,7 +2,6 @@
 
 use RTFLex\io\StringReader;
 
-
 class StringReaderTest extends PHPUnit_Framework_TestCase {
 
     public function testReadByte() {
@@ -22,7 +21,7 @@ class StringReaderTest extends PHPUnit_Framework_TestCase {
         $reader = new StringReader('Hello World');
 
         $this->assertEquals('H', $reader->lookAhead());
-        $this->assertEquals('e', $reader->lookAhead(1));
+        $this->assertEquals('e', $reader->lookAheadOffset(1));
         $this->assertEquals('H', $reader->readByte());
 
         $this->assertEquals('e', $reader->lookAhead());
@@ -30,7 +29,7 @@ class StringReaderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('e', $reader->readByte());
 
         $this->assertEquals('l', $reader->lookAhead());
-        $this->assertEquals('o', $reader->lookAhead(2));
+        $this->assertEquals('o', $reader->lookAheadOffset(2));
         $this->assertEquals('l', $reader->readByte());
 
         $reader->close();

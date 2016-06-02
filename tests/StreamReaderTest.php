@@ -3,9 +3,11 @@
 use RTFLex\io\StreamReader;
 
 
-class StreamReaderTest extends PHPUnit_Framework_TestCase {
+class StreamReaderTest extends PHPUnit_Framework_TestCase
+{
 
-    public function testReadByte() {
+    public function testReadByte()
+    {
         $reader = new StreamReader('tests/sample/hello-world.txt');
 
         $this->assertEquals('S', $reader->readByte());
@@ -19,11 +21,12 @@ class StreamReaderTest extends PHPUnit_Framework_TestCase {
     }
 
 
-    public function testLookAhead() {
+    public function testLookAhead()
+    {
         $reader = new StreamReader('tests/sample/hello-world.txt');
 
         $this->assertEquals('S', $reader->lookAhead());
-        $this->assertEquals('y', $reader->lookAhead(1));
+        $this->assertEquals('y', $reader->lookAheadOffset(1));
         $this->assertEquals('S', $reader->readByte());
 
         $this->assertEquals('y', $reader->lookAhead());
@@ -31,7 +34,7 @@ class StreamReaderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('y', $reader->readByte());
 
         $this->assertEquals('n', $reader->lookAhead());
-        $this->assertEquals(' ', $reader->lookAhead(2));
+        $this->assertEquals(' ', $reader->lookAheadOffset(2));
         $this->assertEquals('n', $reader->readByte());
 
         $reader->close();

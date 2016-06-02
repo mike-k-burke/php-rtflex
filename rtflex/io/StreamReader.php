@@ -12,7 +12,9 @@ class StreamReader implements IByteReader
     private $handle;
     private $size;
     private $lookAheadCache = null;
-    private $cacheOffset = null;
+    private $cacheIndex = 0;
+
+    const CACHE_SIZE = 2000;
 
     /**
      * StreamReader constructor.
@@ -25,8 +27,14 @@ class StreamReader implements IByteReader
 
         $stats = fstat($this->handle);
         $this->size = $stats['size'];
-        $this->lookAheadCache = null;
-        $this->cacheOffset = null;
+
+        fseek($this->handle, $this->index);
+        $this->lookAheadCache = preg_split('//u', fread($this->handle, self::CACHE_SIZE), self::CACHE_SIZE,
+            PREG_SPLIT_NO_EMPTY);
+
+        if (! isset($this->lookAheadCache[$this->cacheIndex])) {
+            $this->lookAheadCache[$this->cacheIndex] = false;
+        }
     }
 
     /**
@@ -41,14 +49,20 @@ class StreamReader implements IByteReader
      * @param int $offset
      * @return bool|string
      */
-    public function lookAhead($offset = 0)
+    public function lookAheadOffset($offset = 0)
     {
-        if (is_null($this->lookAheadCache) || ($offset != $this->cacheOffset)) {
-            fseek($this->handle, $this->index + $offset);
-            $this->lookAheadCache = fread($this->handle, 1);
-            $this->cacheOffset = $offset;
-        }
-        return strlen($this->lookAheadCache) == 0 ? false : $this->lookAheadCache;
+        fseek($this->handle, $this->index + $offset);
+        $char = fread($this->handle, 1);
+
+        return strlen($char) == 0 ? false : $char;
+    }
+
+    /**
+     * @return bool|string
+     */
+    public function lookAhead()
+    {
+        return $this->lookAheadCache[$this->cacheIndex];
     }
 
     /**
@@ -58,8 +72,19 @@ class StreamReader implements IByteReader
     {
         $byte = $this->lookAhead();
         $this->index++;
-        $this->lookAheadCache = null;
-        $this->cacheOffset = null;
+        $this->cacheIndex++;
+
+        if ($this->cacheIndex >= self::CACHE_SIZE) {
+            $this->cacheIndex = 0;
+            fseek($this->handle, $this->index);
+            $this->lookAheadCache = preg_split('//u', fread($this->handle, self::CACHE_SIZE), self::CACHE_SIZE,
+                PREG_SPLIT_NO_EMPTY);
+        }
+
+        if (! isset($this->lookAheadCache[$this->cacheIndex])) {
+            $this->lookAheadCache[$this->cacheIndex] = false;
+        }
+
         return $byte;
     }
 
