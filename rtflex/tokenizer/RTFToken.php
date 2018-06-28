@@ -61,6 +61,7 @@ class RTFToken
 
                 case 'page':
                 case 'par':
+                case 'cell':
                 case 'column':
                 case 'line':
                 case 'sect':
