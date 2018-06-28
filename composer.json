@@ -1,6 +1,6 @@
 {
-    "name": "skyh13/php-rtflex",
-    "description": "A simple library to allow parsing of RTF files and strings. Forked from silvermine/php-rtflex.",
+    "name": "mike-k-burke/php-rtflex",
+    "description": "A simple library to allow parsing of RTF files and strings. Forked from skyh13/php-rtflex which is a fork of silvermine/php-rtflex.",
     "require": {
         "php": ">=5.3.0"
     },
